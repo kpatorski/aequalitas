@@ -18,7 +18,3 @@ testing {
         }
     }
 }
-
-application {
-    mainClass = 'com.sparrow.App'
-}
