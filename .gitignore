@@ -1,9 +1,7 @@
 # Compiled class file
 *.class
 
-.idea/
-
-# Log file
+§§# Log file
 *.log
 
 # BlueJ files
@@ -29,3 +27,7 @@ hs_err_pid*
 
 # Ignore Gradle build output directory
 build
+
+.idea
+*.iml
+.DS_Store
