@@ -27,4 +27,15 @@ class ResultTest extends Specification {
         result.failure().get() == failure
         !result.success().isPresent()
     }
+
+    def "should determine if success"() {
+        given: "any success"
+        String success = "any success"
+
+        when:
+        def result = Result.success(success)
+
+        then:
+        result.isSuccess()
+    }
 }

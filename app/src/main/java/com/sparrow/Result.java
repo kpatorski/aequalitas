@@ -26,4 +26,8 @@ public class Result<Success, Failure> {
     public Optional<Failure> failure() {
         return Optional.ofNullable(failure);
     }
+
+    public boolean isSuccess() {
+        return success != null;
+    }
 }
