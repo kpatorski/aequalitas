@@ -58,6 +58,23 @@ class ResultTest extends Specification {
         anySuccess.get() == "success indeed"
     }
 
+    def "should execute consumer if failure"() {
+        given:
+        def anyFailure = MutableValue.of("any failure")
+        def result = Result.failure(anyFailure)
+
+        when:
+        result.ifFailure(new Consumer<MutableValue>() {
+            @Override
+            void accept(MutableValue failure) {
+                failure.change("failure indeed")
+            }
+        })
+
+        then:
+        anyFailure.get() == "failure indeed"
+    }
+
     private static class MutableValue {
         private String value
 

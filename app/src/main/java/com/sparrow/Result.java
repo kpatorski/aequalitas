@@ -39,4 +39,10 @@ public class Result<Success, Failure> {
         return success != null;
     }
 
+    public Result<Success, Failure> ifFailure(Consumer<Failure> consumer) {
+        if (!isSuccess()) {
+            consumer.accept(failure);
+        }
+        return this;
+    }
 }
