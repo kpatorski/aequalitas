@@ -1,6 +1,7 @@
 package com.sparrow;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class Result<Success, Failure> {
     private final Success success;
@@ -27,7 +28,15 @@ public class Result<Success, Failure> {
         return Optional.ofNullable(failure);
     }
 
+    public Result<Success, Failure> ifSuccess(Consumer<Success> consumer) {
+        if (isSuccess()) {
+            consumer.accept(success);
+        }
+        return this;
+    }
+
     public boolean isSuccess() {
         return success != null;
     }
+
 }

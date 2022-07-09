@@ -1,6 +1,8 @@
 package com.sparrow
 
-import spock.lang.Specification 
+import spock.lang.Specification
+
+import java.util.function.Consumer
 
 class ResultTest extends Specification {
 
@@ -37,5 +39,43 @@ class ResultTest extends Specification {
 
         then:
         result.isSuccess()
+    }
+
+    def "should execute consumer if success"() {
+        given:
+        def anySuccess = MutableValue.of("any success")
+        def result = Result.success(anySuccess)
+
+        when:
+        result.ifSuccess(new Consumer<MutableValue>() {
+            @Override
+            void accept(MutableValue success) {
+                success.change("success indeed")
+            }
+        })
+
+        then:
+        anySuccess.get() == "success indeed"
+    }
+
+    private static class MutableValue {
+        private String value
+
+        private MutableValue(String value) {
+            this.value = value
+        }
+
+        private static MutableValue of(String value) {
+            return new MutableValue(value)
+        }
+
+        private MutableValue change(String newValue) {
+            value = newValue
+            return this
+        }
+
+        private String get() {
+            return value
+        }
     }
 }
