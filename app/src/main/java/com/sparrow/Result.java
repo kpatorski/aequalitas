@@ -1,6 +1,7 @@
 package com.sparrow;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -54,5 +55,14 @@ public class Result<Success, Failure> {
 
     public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier) {
         return isSuccess() ? newResultSupplier.get() : new Result<>(null, failure);
+    }
+
+    public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier,
+                                                        BiFunction<Success, NewSuccess, NewSuccess> successMapper) {
+        if (isSuccess()) {
+            Result<NewSuccess, Failure> result = newResultSupplier.get();
+            return result.isSuccess() ? new Result<>(successMapper.apply(success, result.success), null) : result;
+        }
+        return new Result<>(null, failure);
     }
 }

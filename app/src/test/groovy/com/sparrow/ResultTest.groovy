@@ -92,7 +92,7 @@ class ResultTest extends Specification {
         anyFailure.get() == "failure indeed"
     }
 
-    def "should map to new result if current is success"() {
+    def "should map to new result ignoring current result and if current is success"() {
         when:
         def result = Result.success("any success")
                 .map(() -> Result.success("another success"))
@@ -108,6 +108,21 @@ class ResultTest extends Specification {
 
         then:
         result.failure().get() == "any failure"
+    }
+
+    def "should map to new result mapping previous success only if current is success"() {
+        given:
+        def successA = "success A"
+        def successB = "success B"
+        def successC = "success C"
+
+        when:
+        def result = Result.success(successA)
+                .map(() -> Result.success(successB), (oldSuccess, newSuccess) -> oldSuccess + "," + newSuccess)
+                .map(() -> Result.success(successC), (oldSuccess, newSuccess) -> oldSuccess + "," + newSuccess)
+
+        then:
+        result.success().get() == "success A,success B,success C"
     }
 
     private static class MutableValue {
