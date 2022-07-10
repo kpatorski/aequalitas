@@ -2,6 +2,8 @@ package com.sparrow;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Result<Success, Failure> {
     private final Success success;
@@ -48,5 +50,9 @@ public class Result<Success, Failure> {
 
     public <Value> Value get(Function<Success, Value> successMapper, Function<Failure, Value> failureMapper) {
         return isSuccess() ? successMapper.apply(success) : failureMapper.apply(failure);
+    }
+
+    public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier) {
+        return isSuccess() ? newResultSupplier.get() : new Result<>(null, failure);
     }
 }

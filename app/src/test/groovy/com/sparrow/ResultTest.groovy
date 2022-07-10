@@ -97,6 +97,24 @@ class ResultTest extends Specification {
         anyFailure.get() == "failure indeed"
     }
 
+    def "should map to new result if current is success"() {
+        when:
+        def result = Result.success("any success")
+                .map(() -> Result.success("another success"))
+
+        then:
+        result.success().get() == "another success"
+    }
+
+    def "should not map to new result if current is failure"() {
+        when:
+        def result = Result.failure("any failure")
+                .map(() -> Result.success("any success"))
+
+        then:
+        result.failure().get() == "any failure"
+    }
+
     private static class MutableValue {
         private String value
 
