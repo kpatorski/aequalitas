@@ -45,4 +45,8 @@ public class Result<Success, Failure> {
         }
         return this;
     }
+
+    public <Value> Value get(Function<Success, Value> successMapper, Function<Failure, Value> failureMapper) {
+        return isSuccess() ? successMapper.apply(success) : failureMapper.apply(failure);
+    }
 }

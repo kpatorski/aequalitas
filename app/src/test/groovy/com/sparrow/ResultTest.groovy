@@ -30,6 +30,28 @@ class ResultTest extends Specification {
         !result.success().isPresent()
     }
 
+    def "should return success transformed to value"() {
+        given: "value"
+        String value = "any value"
+
+        when:
+        def result = Result.success(value)
+
+        then:
+        result.get((val) -> "success", (val) -> "failure") == "success"
+    }
+
+    def "should return failure transformed to value"() {
+        given: "value"
+        String value = "any value"
+
+        when:
+        def result = Result.failure(value)
+
+        then:
+        result.get((val) -> "success", (val) -> "failure") == "failure"
+    }
+
     def "should determine if success"() {
         given: "any success"
         String success = "any success"
