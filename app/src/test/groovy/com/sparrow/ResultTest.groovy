@@ -86,12 +86,7 @@ class ResultTest extends Specification {
         def result = Result.failure(anyFailure)
 
         when:
-        result.ifFailure(new Consumer<MutableValue>() {
-            @Override
-            void accept(MutableValue failure) {
-                failure.change("failure indeed")
-            }
-        })
+        result.ifFailure((failure) -> failure.change("failure indeed"))
 
         then:
         anyFailure.get() == "failure indeed"
