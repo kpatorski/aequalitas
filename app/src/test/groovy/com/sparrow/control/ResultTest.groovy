@@ -1,5 +1,6 @@
-package com.sparrow
+package com.sparrow.control
 
+import com.sparrow.control.Result
 import spock.lang.Specification
 
 import java.util.function.Consumer

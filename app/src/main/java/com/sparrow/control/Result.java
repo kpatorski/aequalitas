@@ -1,4 +1,4 @@
-package com.sparrow;
+package com.sparrow.control;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
