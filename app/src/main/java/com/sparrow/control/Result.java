@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.util.Optional.*;
+
 public class Result<Success, Failure> {
     private final Success success;
     private final Failure failure;
@@ -24,11 +26,11 @@ public class Result<Success, Failure> {
     }
 
     public Optional<Success> success() {
-        return Optional.ofNullable(success);
+        return ofNullable(success);
     }
 
     public Optional<Failure> failure() {
-        return Optional.ofNullable(failure);
+        return ofNullable(failure);
     }
 
     public Result<Success, Failure> ifSuccess(Consumer<Success> consumer) {
