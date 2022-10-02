@@ -23,3 +23,15 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.sparrow.control'
+            artifactId 'sparrow-control'
+            version '1.0'
+
+            from components.java
+        }
+    }
+}
+
