@@ -1,12 +1,9 @@
 package com.sparrow.control;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static java.util.Optional.*;
 
 public class Result<Success, Failure> {
     private final Success success;
@@ -25,12 +22,12 @@ public class Result<Success, Failure> {
         return new Result<>(null, failure);
     }
 
-    public Optional<Success> success() {
-        return ofNullable(success);
+    public Success success() {
+        return success;
     }
 
-    public Optional<Failure> failure() {
-        return ofNullable(failure);
+    public Failure failure() {
+        return failure;
     }
 
     public Result<Success, Failure> ifSuccess(Consumer<Success> consumer) {
@@ -38,6 +35,10 @@ public class Result<Success, Failure> {
             consumer.accept(success);
         }
         return this;
+    }
+
+    public boolean isFailure() {
+        return !isSuccess();
     }
 
     public boolean isSuccess() {

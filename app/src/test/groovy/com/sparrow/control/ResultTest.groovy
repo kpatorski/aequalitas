@@ -1,6 +1,5 @@
 package com.sparrow.control
 
-import com.sparrow.control.Result
 import spock.lang.Specification
 
 import java.util.function.Consumer
@@ -15,8 +14,8 @@ class ResultTest extends Specification {
         def result = Result.success(success)
 
         then:
-        result.success().get() == success
-        !result.failure().isPresent()
+        result.success() == success
+        result.isSuccess()
     }
 
     def "should create result of failure"() {
@@ -27,8 +26,8 @@ class ResultTest extends Specification {
         def result = Result.failure(failure)
 
         then:
-        result.failure().get() == failure
-        !result.success().isPresent()
+        result.failure() == failure
+        result.isFailure()
     }
 
     def "should return success transformed to value"() {
@@ -99,7 +98,7 @@ class ResultTest extends Specification {
                 .map(() -> Result.success("another success"))
 
         then:
-        result.success().get() == "another success"
+        result.success() == "another success"
     }
 
     def "should not map to new result if current is failure"() {
@@ -108,7 +107,7 @@ class ResultTest extends Specification {
                 .map(() -> Result.success("any success"))
 
         then:
-        result.failure().get() == "any failure"
+        result.failure() == "any failure"
     }
 
     def "should map to new result mapping previous success only if current is success"() {
@@ -123,7 +122,7 @@ class ResultTest extends Specification {
                 .map(() -> Result.success(successC), (oldSuccess, newSuccess) -> oldSuccess + "," + newSuccess)
 
         then:
-        result.success().get() == "success A,success B,success C"
+        result.success() == "success A,success B,success C"
     }
 
     private static class MutableValue {
