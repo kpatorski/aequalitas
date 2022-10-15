@@ -60,6 +60,10 @@ public class Result<Success, Failure> {
         return isSuccess() ? newResultSupplier.get() : new Result<>(null, failure);
     }
 
+    public <NewSuccess> Result<NewSuccess, Failure> map(Function<Success, Result<NewSuccess, Failure>> successMapper) {
+        return isSuccess() ? successMapper.apply(this.success) : new Result<>(null, failure);
+    }
+
     public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier,
                                                         BiFunction<Success, NewSuccess, NewSuccess> successMapper) {
         if (isSuccess()) {

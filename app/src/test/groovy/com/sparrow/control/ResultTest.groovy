@@ -3,6 +3,8 @@ package com.sparrow.control
 import spock.lang.Specification
 
 import java.util.function.Consumer
+import java.util.function.Function
+import java.util.function.Supplier
 
 class ResultTest extends Specification {
 
@@ -95,22 +97,50 @@ class ResultTest extends Specification {
     def "should map to new result ignoring current result and if current is success"() {
         when:
         def result = Result.success("any success")
-                .map(() -> Result.success("another success"))
+                .map(new Supplier<Result<String, Object>>() {
+                    @Override
+                    Result<String, Object> get() {
+                        Result.success("another success")
+                    }
+                })
 
         then:
         result.success() == "another success"
     }
 
+    def "should map to new result mapping previous success only if current is success"() {
+        given:
+        def successA = "success A"
+        def successB = 100
+
+        when:
+        def result = Result.success(successA)
+                .map(new Function<String, Result<Integer, Object>>() {
+                    @Override
+                    Result<Integer, Object> apply(String s) {
+                        Result.success(successB)
+                    }
+                })
+
+        then:
+        result.success() == successB
+    }
+
     def "should not map to new result if current is failure"() {
         when:
         def result = Result.failure("any failure")
-                .map(() -> Result.success("any success"))
+                .map(new Function<Object, Result<String, String>>() {
+                    @Override
+                    Result<String, String> apply(Object o) {
+                        Result.success("any success")
+                    }
+                })
 
         then:
         result.failure() == "any failure"
     }
 
-    def "should map to new result mapping previous success only if current is success"() {
+    def "should map to new result type mapping previous success only if current is success"() {
         given:
         def successA = "success A"
         def successB = "success B"
