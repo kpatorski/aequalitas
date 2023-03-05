@@ -14,8 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.codehaus.groovy:groovy:3.0.8"
-    testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
+    testImplementation platform("org.spockframework:spock-bom:2.4-M1-groovy-4.0")
     testImplementation "org.spockframework:spock-core"
 }
 
@@ -28,7 +27,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.sparrow.control'
             artifactId 'sparrow-control'
-            version '1.0'
+            version '1.0.1'
 
             from components.java
         }
