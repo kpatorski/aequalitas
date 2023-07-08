@@ -5,8 +5,8 @@ plugins {
 }
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -14,6 +14,8 @@ repositories {
 }
 
 dependencies {
+    implementation "com.google.code.gson:gson:2.9.0"
+    implementation "org.hamcrest:hamcrest-core:2.2"
     testImplementation platform("org.spockframework:spock-bom:2.4-M1-groovy-4.0")
     testImplementation "org.spockframework:spock-core"
 }
