@@ -54,10 +54,6 @@ public class AssertJson {
             return new DefinePath(actual);
         }
 
-        private T value(JsonElement element) {
-            return element.isJsonNull() ? null : GSON.fromJson(element.getAsString(), type);
-        }
-
         private JsonElement elementByPath(JsonElement parent, JsonPath path) {
             if (parent.isJsonObject()) {
                 JsonElement childElement = childElement(parent.getAsJsonObject(), path.value());
@@ -73,6 +69,10 @@ public class AssertJson {
         private JsonElement childElement(JsonObject parent, String childName) {
             return ofNullable(parent.get(childName))
                     .orElseThrow(() -> new NoSuchElementException(format("%s does not exist", this.path)));
+        }
+
+        private T value(JsonElement element) {
+            return element.isJsonNull() ? null : GSON.fromJson(element.getAsString(), type);
         }
     }
 }
