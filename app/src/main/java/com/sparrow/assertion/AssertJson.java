@@ -3,6 +3,7 @@ package com.sparrow.assertion;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.internal.bind.JsonTreeReader;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 
@@ -72,7 +73,22 @@ public class AssertJson {
         }
 
         private T value(JsonElement element) {
-            return element.isJsonNull() ? null : GSON.fromJson(element.getAsString(), type);
+            return element.isJsonNull() ? null : readValue(element);
+        }
+
+        private T readValue(JsonElement element) {
+            try (JsonTreeReader reader = new JsonTreeReader(element)) {
+                reader.setLenient(true);
+                return GSON.fromJson(reader, type);
+            } catch (Exception e) {
+                throw new CouldNotReadElement(element, e);
+            }
+        }
+
+        private static class CouldNotReadElement extends RuntimeException {
+            private CouldNotReadElement(JsonElement element, Exception reason) {
+                super(String.format("Could not read element[%s]", element), reason);
+            }
         }
     }
 }

@@ -33,4 +33,27 @@ class AssertJsonTest extends Specification {
         AssertJson.assertThat(json)
                 .on("kids").satisfies(nullValue(String.class))
     }
+
+    def "primitive value of nested property is asserted"() {
+        given:
+        def json = """
+            {
+                "name": "John",
+                "address": {
+                    "street": "Any street 10",
+                    "postal-code": "555-000",
+                    "owner": {
+                        "first-name": "Max",
+                        "last-name": "Kolonko"
+                    }
+                }
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .on("address.street").satisfies(equalTo("Any street 10"))
+                .on("address.postal-code").satisfies(equalTo("555-000"))
+                .on("address.owner.first-name").satisfies(equalTo("Max"))
+                .on("address.owner.last-name").satisfies(equalTo("Kolonko"))
+    }
 }
