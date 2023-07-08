@@ -55,7 +55,7 @@ public class AssertJson {
         }
 
         private T value(JsonElement element) {
-            return GSON.fromJson(element.getAsString(), type);
+            return element.isJsonNull() ? null : GSON.fromJson(element.getAsString(), type);
         }
 
         private JsonElement elementByPath(JsonElement parent, JsonPath path) {

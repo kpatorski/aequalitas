@@ -20,4 +20,17 @@ class AssertJsonTest extends Specification {
                 .on("age").satisfies(equalTo("15"))
                 .on("age", Integer.class).satisfies(equalTo(15))
     }
+
+    def "null value of top level property is asserted"() {
+        given:
+        def json = """
+            {
+                "name": "John",
+                "kids": null
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .on("kids").satisfies(nullValue(String.class))
+    }
 }
