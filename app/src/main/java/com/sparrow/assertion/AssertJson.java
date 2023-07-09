@@ -3,6 +3,7 @@ package com.sparrow.assertion;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.bind.JsonTreeReader;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -11,13 +12,22 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 public class AssertJson {
+    private static final Gson GSON = new Gson();
+
     private AssertJson() {
     }
 
     public static DefinePath assertThat(String json) {
         assertNotNull(json, "Json");
-        JsonObject actual = new Gson().fromJson(json, JsonObject.class);
-        return new DefinePath(actual);
+        return new DefinePath(deserialize(json));
+    }
+
+    private static JsonObject deserialize(String json) {
+        try {
+            return GSON.fromJson(json, JsonObject.class);
+        } catch (JsonSyntaxException e) {
+            throw new JsonHasInvalidFormat(e);
+        }
     }
 
     public static class DefinePath {
@@ -94,18 +104,6 @@ public class AssertJson {
                 throw new CouldNotReadElement(element, e);
             }
         }
-
-        public static class CouldNotReadElement extends RuntimeException {
-            private CouldNotReadElement(JsonElement element, Exception reason) {
-                super(format("Could not read element[%s]", element), reason);
-            }
-        }
-
-        public static class CouldNotFindElement extends RuntimeException {
-            private CouldNotFindElement(String path) {
-                super(format("Could not find element %s", path));
-            }
-        }
     }
 
     private static void assertNotNull(Object object, String description) {
@@ -113,4 +111,5 @@ public class AssertJson {
             throw new IllegalArgumentException(format("%s must not be null", description));
         }
     }
+
 }

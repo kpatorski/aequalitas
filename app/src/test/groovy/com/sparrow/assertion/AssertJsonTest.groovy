@@ -3,7 +3,6 @@ package com.sparrow.assertion
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static com.sparrow.assertion.AssertJson.Assertion.*
 import static org.hamcrest.Matchers.*
 
 class AssertJsonTest extends Specification {
@@ -94,6 +93,18 @@ class AssertJsonTest extends Specification {
 
         then:
         thrown(IllegalArgumentException)
+    }
+
+    @Unroll
+    def "exception is thrown if input is not a valid Json"() {
+        when:
+        AssertJson.assertThat(json).on("any").satisfies(is(equalTo("value")))
+
+        then:
+        thrown(JsonHasInvalidFormat)
+
+        where:
+        json << ["{invalid: json,}", "invalid: json,"]
     }
 
     def "exception is thrown if matcher is null"() {
