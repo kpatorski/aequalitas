@@ -154,7 +154,7 @@ class AssertJsonTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    def "exception is thrown if path leads to non-existing property"() {
+    def "exception is thrown if path leads to non-existing top level property"() {
         given:
         def json = """
             {
@@ -164,6 +164,23 @@ class AssertJsonTest extends Specification {
 
         when:
         AssertJson.assertThat(json).on("non-existing").satisfies(is(equalTo("John")))
+
+        then:
+        thrown(CouldNotFindElement)
+    }
+
+    def "exception is thrown if path leads to non-existing nested property"() {
+        given:
+        def json = """
+            {
+                "address": {
+                    "street" : "any street"
+                }
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on("address.non-existing").satisfies(is(equalTo("any street")))
 
         then:
         thrown(CouldNotFindElement)
