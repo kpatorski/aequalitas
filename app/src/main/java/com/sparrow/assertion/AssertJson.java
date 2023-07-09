@@ -18,8 +18,15 @@ public class AssertJson {
     }
 
     public static DefinePath assertThat(String json) {
-        assertNotNull(json, "Json");
+        assertNotEmpty(json);
         return new DefinePath(deserialize(json));
+    }
+
+    private static void assertNotEmpty(String json) {
+        assertNotNull(json, "Json");
+        if (json.isBlank()) {
+            throw new IllegalArgumentException("Json must not be empty");
+        }
     }
 
     private static JsonObject deserialize(String json) {

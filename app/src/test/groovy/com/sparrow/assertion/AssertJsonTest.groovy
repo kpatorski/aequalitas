@@ -95,6 +95,14 @@ class AssertJsonTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
+    def "exception is thrown if JSON is empty"() {
+        when:
+        AssertJson.assertThat("")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     @Unroll
     def "exception is thrown if input is not a valid Json"() {
         when:
