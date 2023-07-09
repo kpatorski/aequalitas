@@ -3,6 +3,7 @@ package com.sparrow.assertion
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.sparrow.assertion.AssertJson.Assertion.*
 import static org.hamcrest.Matchers.*
 
 class AssertJsonTest extends Specification {
@@ -83,5 +84,88 @@ class AssertJsonTest extends Specification {
 
     static enum EnumType {
         VALUE_ONE, VALUE_TWO, VALUE_THREE
+    }
+
+    def "exception is thrown if JSON is null"() {
+        when:
+        AssertJson.assertThat(null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "exception is thrown if matcher is null"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on("name").satisfies(null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "exception is thrown if property is null"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on(null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "exception is thrown if property type is null"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on("name", null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "exception is thrown if property is empty"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on("").satisfies(is(emptyString()))
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "exception is thrown if path leads to non-existing property"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).on("non-existing").satisfies(is(equalTo("John")))
+
+        then:
+        thrown(CouldNotFindElement)
     }
 }

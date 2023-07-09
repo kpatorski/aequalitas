@@ -7,8 +7,6 @@ import com.google.gson.internal.bind.JsonTreeReader;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 
-import java.util.NoSuchElementException;
-
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -17,6 +15,7 @@ public class AssertJson {
     }
 
     public static DefinePath assertThat(String json) {
+        assertNotNull(json, "Json");
         JsonObject actual = new Gson().fromJson(json, JsonObject.class);
         return new DefinePath(actual);
     }
@@ -29,11 +28,21 @@ public class AssertJson {
         }
 
         public Assertion<String> on(String path) {
+            assertPathIsNotEmpty(path);
             return new Assertion<>(actual, JsonPath.of(path), String.class);
         }
 
         public <T> Assertion<T> on(String path, Class<T> type) {
+            assertPathIsNotEmpty(path);
+            assertNotNull(type, "element type");
             return new Assertion<>(actual, JsonPath.of(path), type);
+        }
+
+        private static void assertPathIsNotEmpty(String path) {
+            assertNotNull(path, "path to element");
+            if (path.isBlank()) {
+                throw new IllegalArgumentException(format("%s path must not be empty", path));
+            }
         }
     }
 
@@ -50,6 +59,7 @@ public class AssertJson {
         }
 
         public DefinePath satisfies(Matcher<T> assertion) {
+            assertNotNull(assertion, "assertion");
             T value = value(elementByPath(actual, path));
             MatcherAssert.assertThat(value, assertion);
             return new DefinePath(actual);
@@ -69,7 +79,7 @@ public class AssertJson {
 
         private JsonElement childElement(JsonObject parent, String childName) {
             return ofNullable(parent.get(childName))
-                    .orElseThrow(() -> new NoSuchElementException(format("%s does not exist", this.path)));
+                    .orElseThrow(() -> new CouldNotFindElement(this.path.value()));
         }
 
         private T value(JsonElement element) {
@@ -85,10 +95,22 @@ public class AssertJson {
             }
         }
 
-        private static class CouldNotReadElement extends RuntimeException {
+        public static class CouldNotReadElement extends RuntimeException {
             private CouldNotReadElement(JsonElement element, Exception reason) {
-                super(String.format("Could not read element[%s]", element), reason);
+                super(format("Could not read element[%s]", element), reason);
             }
+        }
+
+        public static class CouldNotFindElement extends RuntimeException {
+            private CouldNotFindElement(String path) {
+                super(format("Could not find element %s", path));
+            }
+        }
+    }
+
+    private static void assertNotNull(Object object, String description) {
+        if (object == null) {
+            throw new IllegalArgumentException(format("%s must not be null", description));
         }
     }
 }
