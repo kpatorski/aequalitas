@@ -31,7 +31,8 @@ class AssertJsonTest extends Specification {
             {
                 "integer": 15,
                 "double": 2.5,
-                "string": "text"
+                "string": "text",
+                "enum": "VALUE_TWO"
             }
            """
         expect:
@@ -39,18 +40,19 @@ class AssertJsonTest extends Specification {
                 .on("integer", Integer.class).satisfies(equalTo(15))
                 .on("double", Double.class).satisfies(equalTo(2.5d))
                 .on("string", String.class).satisfies(equalTo("text"))
+                .on("enum", EnumType.class).satisfies(equalTo(EnumType.VALUE_TWO))
     }
 
     def "null value is asserted"() {
         given:
         def json = """
             {
-                "kids": null
+                "nullable": null
             }
            """
         expect:
         AssertJson.assertThat(json)
-                .on("kids").satisfies(nullValue(String.class))
+                .on("nullable").satisfies(nullValue(String.class))
     }
 
     @Unroll
@@ -77,5 +79,9 @@ class AssertJsonTest extends Specification {
         "address.postal-code" | "555-000"
         "address.owner.name"  | "Max"
         "address.owner.id"    | "12355"
+    }
+
+    static enum EnumType {
+        VALUE_ONE, VALUE_TWO, VALUE_THREE
     }
 }
