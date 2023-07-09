@@ -1,12 +1,14 @@
 package com.sparrow.assertion
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static org.hamcrest.Matchers.*
 
 class AssertJsonTest extends Specification {
 
-    def "primitive value of top level property is asserted"() {
+    @Unroll
+    def "[#value] value of top level property [#property] is asserted"() {
         given:
         def json = """
             {
@@ -15,17 +17,34 @@ class AssertJsonTest extends Specification {
             }
            """
         expect:
-        AssertJson.assertThat(json)
-                .on("name").satisfies(equalTo("John"))
-                .on("age").satisfies(equalTo("15"))
-                .on("age", Integer.class).satisfies(equalTo(15))
+        AssertJson.assertThat(json).on(property).satisfies(equalTo(value))
+
+        where:
+        property | value
+        "name"   | "John"
+        "age"    | "15"
     }
 
-    def "null value of top level property is asserted"() {
+    def "value is casted to desired type"() {
         given:
         def json = """
             {
-                "name": "John",
+                "integer": 15,
+                "double": 2.5,
+                "string": "text"
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .on("integer", Integer.class).satisfies(equalTo(15))
+                .on("double", Double.class).satisfies(equalTo(2.5d))
+                .on("string", String.class).satisfies(equalTo("text"))
+    }
+
+    def "null value is asserted"() {
+        given:
+        def json = """
+            {
                 "kids": null
             }
            """
@@ -34,11 +53,11 @@ class AssertJsonTest extends Specification {
                 .on("kids").satisfies(nullValue(String.class))
     }
 
-    def "primitive value of nested property is asserted"() {
+    @Unroll
+    def "[#value] value of nested level property [#property] is asserted"() {
         given:
         def json = """
             {
-                "name": "John",
                 "address": {
                     "street": "Any street 10",
                     "postal-code": "555-000",
@@ -50,10 +69,13 @@ class AssertJsonTest extends Specification {
             }
            """
         expect:
-        AssertJson.assertThat(json)
-                .on("address.street").satisfies(equalTo("Any street 10"))
-                .on("address.postal-code").satisfies(equalTo("555-000"))
-                .on("address.owner.name").satisfies(equalTo("Max"))
-                .on("address.owner.id", Integer.class).satisfies(equalTo(12355))
+        AssertJson.assertThat(json).on(property).satisfies(equalTo(value))
+
+        where:
+        property              | value
+        "address.street"      | "Any street 10"
+        "address.postal-code" | "555-000"
+        "address.owner.name"  | "Max"
+        "address.owner.id"    | "12355"
     }
 }
