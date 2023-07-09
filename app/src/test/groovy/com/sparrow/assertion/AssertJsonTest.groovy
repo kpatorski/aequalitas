@@ -33,7 +33,12 @@ class AssertJsonTest extends Specification {
                 "integer": 15,
                 "double": 2.5,
                 "string": "text",
-                "enum": "VALUE_TWO"
+                "enum": "VALUE_TWO",
+                "custom-object": {
+                    "propertyA": "A",
+                    "propertyB": "B",
+                    "propertyC": 100
+                }
             }
            """
         expect:
@@ -42,6 +47,7 @@ class AssertJsonTest extends Specification {
                 .on("double", Double.class).satisfies(equalTo(2.5d))
                 .on("string", String.class).satisfies(equalTo("text"))
                 .on("enum", EnumType.class).satisfies(equalTo(EnumType.VALUE_TWO))
+                .on("custom-object", CustomType.class).satisfies(equalTo(new CustomType("A", "B", 100)))
     }
 
     def "null value is asserted"() {
@@ -80,10 +86,6 @@ class AssertJsonTest extends Specification {
         "address.postal-code" | "555-000"
         "address.owner.name"  | "Max"
         "address.owner.id"    | "12355"
-    }
-
-    static enum EnumType {
-        VALUE_ONE, VALUE_TWO, VALUE_THREE
     }
 
     def "exception is thrown if JSON is null"() {
@@ -184,5 +186,12 @@ class AssertJsonTest extends Specification {
 
         then:
         thrown(CouldNotFindElement)
+    }
+
+    static enum EnumType {
+        VALUE_ONE, VALUE_TWO, VALUE_THREE
+    }
+
+    static record CustomType(String propertyA, String propertyB, int propertyC) {
     }
 }
