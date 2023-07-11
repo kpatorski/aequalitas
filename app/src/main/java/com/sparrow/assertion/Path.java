@@ -4,21 +4,26 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-class JsonPath {
+import static com.sparrow.assertion.InvalidArgument.throwIf;
+import static java.util.Objects.isNull;
+
+class Path {
     private static final String PATH_SEPARATOR = ".";
     private final String value;
-    private JsonPath descendant;
+    private Path descendant;
 
-    private JsonPath(String value, Iterator<String> descendants) {
+    private Path(String value, Iterator<String> descendants) {
         this.value = value;
         if (descendants.hasNext()) {
-            this.descendant = new JsonPath(descendants.next(), descendants);
+            this.descendant = new Path(descendants.next(), descendants);
         }
     }
 
-    static JsonPath of(String fullPath) {
+    static Path of(String fullPath) {
+        throwIf(()-> isNull(fullPath), "Path must not be null");
+        throwIf(fullPath::isBlank, "Path must not be empty");
         Iterator<String> pathParts = splitIntoParts(fullPath);
-        return new JsonPath(pathParts.next(), pathParts);
+        return new Path(pathParts.next(), pathParts);
     }
 
     private static Iterator<String> splitIntoParts(String fullPath) {
@@ -26,7 +31,7 @@ class JsonPath {
         return Arrays.asList(pathParts).iterator();
     }
 
-    JsonPath descendant() {
+    Path descendant() {
         return descendant;
     }
 

@@ -3,36 +3,88 @@ package com.sparrow.assertion
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.sparrow.assertion.AssertJsonTest.EnumType.NESTED_VALUE
+import static com.sparrow.assertion.AssertJsonTest.EnumType.TOP_LEVEL_VALUE
 import static org.hamcrest.Matchers.*
 
 class AssertJsonTest extends Specification {
 
-    @Unroll
-    def "[#value] value of top level property [#property] is asserted"() {
+    def "string value is asserted"() {
         given:
         def json = """
             {
-                "name": "John",
-                "age": 15
+                "string": "any top level",
+                "nested": {
+                    "nested": {
+                    "string": "any nested"
+                    }
+                }
             }
            """
         expect:
-        AssertJson.assertThat(json).on(property).satisfies(equalTo(value))
-
-        where:
-        property | value
-        "name"   | "John"
-        "age"    | "15"
+        AssertJson.assertThat(json)
+                .string("string").satisfies(equalTo("any top level"))
+                .string("nested.nested.string").satisfies(equalTo("any nested"))
     }
 
-    def "value is casted to desired type"() {
+    def "integer value is asserted"() {
         given:
         def json = """
             {
                 "integer": 15,
-                "double": 2.5,
-                "string": "text",
-                "enum": "VALUE_TWO",
+                "nested": {
+                    "nested": {
+                    "integer": 100
+                    }
+                }
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .intNumber("integer").satisfies(equalTo(15))
+                .intNumber("nested.nested.integer").satisfies(equalTo(100))
+    }
+
+    def "double value is asserted"() {
+        given:
+        def json = """
+            {
+                "double": 15.5,
+                "nested": {
+                    "nested": {
+                    "double": 100.0
+                    }
+                }
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .doubleNumber("double").satisfies(equalTo(15.5d))
+                .doubleNumber("nested.nested.double").satisfies(equalTo(100.0d))
+    }
+
+    def "enum value is asserted"() {
+        given:
+        def json = """
+            {
+                "enum": TOP_LEVEL_VALUE,
+                "nested": {
+                    "nested": {
+                    "enum": NESTED_VALUE
+                    }
+                }
+            }
+           """
+        expect:
+        AssertJson.assertThat(json)
+                .enumerated("enum", EnumType.class).satisfies(equalTo(TOP_LEVEL_VALUE))
+                .enumerated("nested.nested.enum", EnumType.class).satisfies(equalTo(NESTED_VALUE))
+    }
+
+    def "custom object is asserted"() {
+        given:
+        def json = """
+            {
                 "custom-object": {
                     "propertyA": "A",
                     "propertyB": "B",
@@ -42,11 +94,7 @@ class AssertJsonTest extends Specification {
            """
         expect:
         AssertJson.assertThat(json)
-                .on("integer", Integer.class).satisfies(equalTo(15))
-                .on("double", Double.class).satisfies(equalTo(2.5d))
-                .on("string", String.class).satisfies(equalTo("text"))
-                .on("enum", EnumType.class).satisfies(equalTo(EnumType.VALUE_TWO))
-                .on("custom-object", CustomType.class).satisfies(equalTo(new CustomType("A", "B", 100)))
+                .object("custom-object", CustomType.class).satisfies(equalTo(new CustomType("A", "B", 100)))
     }
 
     def "null value is asserted"() {
@@ -58,33 +106,7 @@ class AssertJsonTest extends Specification {
            """
         expect:
         AssertJson.assertThat(json)
-                .on("nullable").satisfies(nullValue(String.class))
-    }
-
-    @Unroll
-    def "[#value] value of nested level property [#property] is asserted"() {
-        given:
-        def json = """
-            {
-                "address": {
-                    "street": "Any street 10",
-                    "postal-code": "555-000",
-                    "owner": {
-                        "name": "Max",
-                        "id": 12355
-                    }
-                }
-            }
-           """
-        expect:
-        AssertJson.assertThat(json).on(property).satisfies(equalTo(value))
-
-        where:
-        property              | value
-        "address.street"      | "Any street 10"
-        "address.postal-code" | "555-000"
-        "address.owner.name"  | "Max"
-        "address.owner.id"    | "12355"
+                .string("nullable").satisfies(nullValue(String.class))
     }
 
     def "exception is thrown if JSON is null"() {
@@ -92,7 +114,7 @@ class AssertJsonTest extends Specification {
         AssertJson.assertThat(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
     }
 
     def "exception is thrown if JSON is empty"() {
@@ -100,13 +122,13 @@ class AssertJsonTest extends Specification {
         AssertJson.assertThat("")
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
     }
 
     @Unroll
     def "exception is thrown if input is not a valid Json"() {
         when:
-        AssertJson.assertThat(json).on("any").satisfies(is(equalTo("value")))
+        AssertJson.assertThat(json).element("any").satisfies(is(equalTo("value")))
 
         then:
         thrown(JsonHasInvalidFormat)
@@ -115,7 +137,7 @@ class AssertJsonTest extends Specification {
         json << ["{invalid: json,}", "invalid: json,"]
     }
 
-    def "exception is thrown if matcher is null"() {
+    def "exception is thrown if condition is null"() {
         given:
         def json = """
             {
@@ -124,10 +146,10 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on("name").satisfies(null)
+        AssertJson.assertThat(json).string("name").satisfies(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
     }
 
     def "exception is thrown if property is null"() {
@@ -139,13 +161,13 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on(null)
+        AssertJson.assertThat(json).string(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
     }
 
-    def "exception is thrown if property type is null"() {
+    def "exception is thrown if object type is null"() {
         given:
         def json = """
             {
@@ -154,13 +176,13 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on("name", null)
+        AssertJson.assertThat(json).object("name", null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
     }
 
-    def "exception is thrown if property is empty"() {
+    def "exception is thrown if enum type is null"() {
         given:
         def json = """
             {
@@ -169,10 +191,25 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on("").satisfies(is(emptyString()))
+        AssertJson.assertThat(json).enumerated("name", null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(InvalidArgument)
+    }
+
+    def "exception is thrown if path is empty"() {
+        given:
+        def json = """
+            {
+                "name": "John"
+            }
+           """
+
+        when:
+        AssertJson.assertThat(json).string("").satisfies(is(emptyString()))
+
+        then:
+        thrown(InvalidArgument)
     }
 
     def "exception is thrown if path leads to non-existing top level property"() {
@@ -184,7 +221,7 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on("non-existing").satisfies(is(equalTo("John")))
+        AssertJson.assertThat(json).string("non-existing").satisfies(is(equalTo("John")))
 
         then:
         thrown(CouldNotFindElement)
@@ -201,14 +238,14 @@ class AssertJsonTest extends Specification {
            """
 
         when:
-        AssertJson.assertThat(json).on("address.non-existing").satisfies(is(equalTo("any street")))
+        AssertJson.assertThat(json).string("address.non-existing").satisfies(is(equalTo("any street")))
 
         then:
         thrown(CouldNotFindElement)
     }
 
     static enum EnumType {
-        VALUE_ONE, VALUE_TWO, VALUE_THREE
+        TOP_LEVEL_VALUE, NESTED_VALUE
     }
 
     static record CustomType(String propertyA, String propertyB, int propertyC) {
