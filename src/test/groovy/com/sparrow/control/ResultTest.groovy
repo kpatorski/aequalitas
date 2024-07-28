@@ -3,6 +3,7 @@ package com.sparrow.control
 import spock.lang.Specification
 
 import java.util.function.Consumer
+import java.util.function.Function
 
 class ResultTest extends Specification {
 
@@ -95,7 +96,7 @@ class ResultTest extends Specification {
     def "map success to new one only if it is a success"() {
         when:
         def result = Result.success("any success")
-                .mapSuccess(() -> "another success")
+                .mapSuccess { "another success" }
 
         then:
         result.success() == "another success"
@@ -104,7 +105,7 @@ class ResultTest extends Specification {
     def "does not map success to new one if it is failure"() {
         when:
         def result = Result.failure("any failure")
-                .mapSuccess(() -> "another success")
+                .mapSuccess { "another success" }
 
         then:
         result.failure() == "any failure"
@@ -112,8 +113,8 @@ class ResultTest extends Specification {
 
     def "map failure to new one only if it is a failure"() {
         when:
-        def result = Result.success("any failure")
-                .mapFailure(() -> "another failure")
+        def result = Result.failure("any failure")
+                .mapFailure { "another failure" }
 
         then:
         result.failure() == "another failure"
@@ -122,7 +123,7 @@ class ResultTest extends Specification {
     def "does not map failure to new one if it is success"() {
         when:
         def result = Result.success("any success")
-                .mapFailure(() -> "another failure")
+                .mapFailure { "another failure" }
 
         then:
         result.success() == "any success"
@@ -131,7 +132,13 @@ class ResultTest extends Specification {
     def "map only success to new one if it is a success"() {
         when:
         def result = Result.success("any success")
-                .map(() -> "another success", ()-> "another failure")
+                .map(new Function<String, String>() {
+                    @Override
+                    String apply(String success) { "another success" }
+                }, new Function<String, String>() {
+                    @Override
+                    String apply(String failure) { "another failure" }
+                })
 
         then:
         result.success() == "another success"
@@ -140,7 +147,13 @@ class ResultTest extends Specification {
     def "map only failure to new one if it is a failure"() {
         when:
         def result = Result.failure("any failure")
-                .map(() -> "another success", ()-> "another failure")
+                .map(new Function<String, String>() {
+                    @Override
+                    String apply(String success) { "another success" }
+                }, new Function<String, String>() {
+                    @Override
+                    String apply(String failure) { "another failure" }
+                })
 
         then:
         result.failure() == "another failure"
