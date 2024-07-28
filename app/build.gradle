@@ -4,9 +4,20 @@ plugins {
     id 'maven-publish'
 }
 
-compileJava {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
 }
 
 repositories {
@@ -29,7 +40,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.sparrow.control'
             artifactId 'sparrow-control'
-            version '1.1.0'
+            version '1.1.1'
 
             from components.java
         }

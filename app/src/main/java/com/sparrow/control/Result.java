@@ -1,9 +1,7 @@
 package com.sparrow.control;
 
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Result<Success, Failure> {
     private final Success success;
@@ -56,20 +54,16 @@ public class Result<Success, Failure> {
         return isSuccess() ? successMapper.apply(success) : failureMapper.apply(failure);
     }
 
-    public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier) {
-        return isSuccess() ? newResultSupplier.get() : new Result<>(null, failure);
+    public <NewSuccess> Result<NewSuccess, Failure> mapSuccess(Function<Success, NewSuccess> mapper) {
+        return isSuccess() ? success(mapper.apply(this.success)) : failure(failure);
     }
 
-    public <NewSuccess> Result<NewSuccess, Failure> map(Function<Success, Result<NewSuccess, Failure>> successMapper) {
-        return isSuccess() ? successMapper.apply(this.success) : new Result<>(null, failure);
+    public <NewFailure> Result<Success, NewFailure> mapFailure(Function<Failure, NewFailure> mapper) {
+        return isSuccess() ? success(success) : failure(mapper.apply(this.failure));
     }
 
-    public <NewSuccess> Result<NewSuccess, Failure> map(Supplier<Result<NewSuccess, Failure>> newResultSupplier,
-                                                        BiFunction<Success, NewSuccess, NewSuccess> successMapper) {
-        if (isSuccess()) {
-            Result<NewSuccess, Failure> result = newResultSupplier.get();
-            return result.isSuccess() ? new Result<>(successMapper.apply(success, result.success), null) : result;
-        }
-        return new Result<>(null, failure);
+    public <NewSuccess, NewFailure> Result<NewSuccess, NewFailure> map(Function<Success, NewSuccess> successMapper,
+                                                                       Function<Failure, NewFailure> failureMapper) {
+        return isSuccess() ? success(successMapper.apply(this.success)) : failure(failureMapper.apply(this.failure));
     }
 }
