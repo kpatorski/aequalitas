@@ -159,6 +159,24 @@ class ResultTest extends Specification {
         result.failure() == "another failure"
     }
 
+    def "flat success only if it is a success"() {
+        when:
+        def result = Result.success("any success")
+                .flatSuccess{Result.success("another success")}
+
+        then:
+        result.success() == "another success"
+    }
+
+    def "flat failure only if it is a failure"() {
+        when:
+        def result = Result.failure("any failure")
+                .flatFailure{Result.failure("another failure")}
+
+        then:
+        result.failure() == "another failure"
+    }
+
     private static class MutableValue {
         private String value
 
