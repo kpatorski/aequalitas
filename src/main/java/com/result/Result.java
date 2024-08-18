@@ -72,6 +72,11 @@ public class Result<Success, Failure> {
     }
 
     public <NewFailure> Result<Success, NewFailure> flatFailure(Function<Failure, Result<Success, NewFailure>> mapper) {
-        return isSuccess() ? success(success) : mapper.apply(this.failure);
+        return isFailure() ? mapper.apply(this.failure) : success(success);
+    }
+
+    public <NewSuccess, NewFailure> Result<NewSuccess, NewFailure> flat(Function<Success, Result<NewSuccess, NewFailure>> successMapper,
+                                                                        Function<Failure, Result<NewSuccess, NewFailure>> failureMapper) {
+        return isSuccess() ? successMapper.apply(this.success) : failureMapper.apply(this.failure);
     }
 }

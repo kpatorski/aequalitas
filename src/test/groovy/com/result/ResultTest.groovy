@@ -162,7 +162,7 @@ class ResultTest extends Specification {
     def "flat success only if it is a success"() {
         when:
         def result = Result.success("any success")
-                .flatSuccess{Result.success("another success")}
+                .flatSuccess { Result.success("another success") }
 
         then:
         result.success() == "another success"
@@ -171,10 +171,40 @@ class ResultTest extends Specification {
     def "flat failure only if it is a failure"() {
         when:
         def result = Result.failure("any failure")
-                .flatFailure{Result.failure("another failure")}
+                .flatFailure { Result.failure("another failure") }
 
         then:
         result.failure() == "another failure"
+    }
+
+    def "flat only success to new one if it is a success"() {
+        when:
+        def result = Result.success("any success")
+                .flat(new Function<String, Result<String, Integer>>() {
+                    @Override
+                    Result<String, Integer> apply(String success) { Result.success("another success") }
+                }, new Function<String, Result<String, Integer>>() {
+                    @Override
+                    Result<String, Integer> apply(String failure) { Result.failure(404) }
+                })
+
+        then:
+        result.success() == "another success"
+    }
+
+    def "flat only failure to new one if it is a failure"() {
+        when:
+        def result = Result.failure("any failure")
+                .flat(new Function<String, Result<String, Integer>>() {
+                    @Override
+                    Result<String, Integer> apply(String success) { Result.success("another success") }
+                }, new Function<String, Result<String, Integer>>() {
+                    @Override
+                    Result<String, Integer> apply(String failure) { Result.failure(404) }
+                })
+
+        then:
+        result.failure() == 404
     }
 
     private static class MutableValue {
